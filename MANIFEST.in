@@ -1,0 +1,4 @@
+include README.md
+recursive-include octoprint_preheathelper/templates *
+recursive-include octoprint_preheathelper/translations *
+recursive-include octoprint_preheathelper/static *
