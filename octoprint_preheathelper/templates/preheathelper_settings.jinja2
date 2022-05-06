@@ -1,0 +1,75 @@
+<h3>{{ _('PreHeat Helper Settings') }}</h3>
+<form class="form-horizontal" id="settings_plugin_preheat_helper_form">
+    <div class="control-group">
+        <h4>{{ _('Temperature Setpoint Defaults') }}</h4>
+        <span>Leave field empty to disable</span></br>
+        <label class="control-label">{{ _('Nozzle') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" class="input-block-level" min="30" max="314" data-bind="value: settings.plugins.preheathelper.nozzle_setpoint_default">
+                <span class="add-on">&#8451;</span>
+            </div>
+        </div>
+        <label class="control-label">{{ _('Bed') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" class="input-block-level" min="30" max="120" data-bind="value: settings.plugins.preheathelper.bed_setpoint_default">
+                <span class="add-on">&#8451;</span>
+            </div>
+        </div>
+        <label class="control-label">{{ _('Chamber') }}</label>
+        <div class="controls">
+            <div class="input-append">
+                <input type="number" class="input-block-level" min="20" max="80" data-bind="value: settings.plugins.preheathelper.chamber_setpoint_default">
+                <span class="add-on">&#8451;</span>
+            </div>
+        </div>
+
+        <h4>{{ _('Auto preheat') }}</h4>
+        <div class="control-group">
+            <div class="controls">
+                <label class="checkbox">
+                <input type="checkbox" title="Preheat on Octoprint startup" data-bind="checked: settings.plugins.preheathelper.preheat_on_octoprint_startup" />Preheat on Octoprint startup
+                </label>
+            </div>
+            <div class="controls">
+                <label class="checkbox">
+                <input type="checkbox" title="Preheat on printer connected" data-bind="checked: settings.plugins.preheathelper.preheat_on_printer_connected" />Preheat when printer connects
+                </label>
+            </div>
+            <div class="controls">
+                <label class="checkbox">
+                <input type="checkbox" title="Preheat on GCode loaded" data-bind="checked: settings.plugins.preheathelper.preheat_on_file_load" />Preheat on file loaded
+                </label>
+            </div>
+        </div>
+
+        <h4>{{ _('GCode file parsing') }}</h4>
+        <span>GCode parsing only enabled when 'Preheat on GCode loaded' is enabled</span></br>
+        <div class="control-group">
+            <div class="controls">
+                <label class="checkbox">
+                <input type="checkbox" title="Search for Nozzle setpoint" data-bind="checked: settings.plugins.preheathelper.search_nozzle" />Search for Nozzle setpoint
+                </label>
+            </div>
+            <div class="controls">
+                <label class="checkbox">
+                <input type="checkbox" title="Search for Bed setpoint" data-bind="checked: settings.plugins.preheathelper.search_bed" />Search for Bed setpoint
+                </label>
+            </div>
+            <div class="controls">
+                <label class="checkbox">
+                <input type="checkbox" title="Search for Chamber setpoint" data-bind="checked: settings.plugins.preheathelper.search_chamber" />Search for Chamber setpoint
+                </label>
+            </div>
+            <label class="control-label">{{ _('Max.Nr. of lines to parse') }}</label>
+            <div class="controls">
+                <div class="input-append">
+                    <input type="number" class="input-block-level" data-bind="value: settings.plugins.preheathelper.max_search_lines">
+                    <span class="add-on">lines</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
