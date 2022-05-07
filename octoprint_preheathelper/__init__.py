@@ -22,7 +22,6 @@ MINIMAL_SETPOINT_TEMPERATURE = 20
 class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
                             octoprint.plugin.StartupPlugin,
                             octoprint.plugin.ShutdownPlugin,
-                            octoprint.plugin.AssetPlugin,
                             octoprint.plugin.TemplatePlugin,
                             octoprint.plugin.EventHandlerPlugin ):
 
@@ -161,7 +160,6 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
             max_search_lines=2500,
 
             preheat_on_file_load=True,
-            preheat_on_octoprint_startup=False,
             preheat_on_printer_connected=True,
 
             # Not a setting, just to store last known setpoints...
@@ -190,25 +188,11 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
     def on_after_startup(self):
         self._logger.debug("on_after_startup()")
         self.print_settings()
-        if self._settings.get(["preheat_on_octoprint_startup"]):
-            self._logger.info("Starting pre-heat after startup")
-            self.do_preheat(self._settings.get(["nozzle_setpoint_default"]),
-                            self._settings.get(["bed_setpoint_default"]),
-                            self._settings.get(["chamber_setpoint_default"]) )
 
     ##~~ ShutdownPlugin mixin
 
     def on_shutdown(self):
         self._logger.debug("PreHeatHelper shutdown!")
-
-    ##~~ AssetPlugin mixin
-
-    def get_assets(self):
-        # Define your plugin's asset files to automatically include in the
-        # core UI here.
-        return {
-            "js": ["js/preheathelper.js"]
-        }
 
     ##~~ TemplatePlugin mixin
 
