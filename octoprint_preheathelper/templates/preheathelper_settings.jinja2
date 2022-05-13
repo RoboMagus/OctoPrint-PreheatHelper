@@ -36,8 +36,21 @@
                 <label class="checkbox">
                 <input type="checkbox" title="Preheat on GCode loaded" data-bind="checked: settings.plugins.preheathelper.preheat_on_file_load" />Preheat on file loaded
                 </label>
+            </div>                
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" data-bind="checked: settings.plugins.preheathelper.check_bedready_before_preheat, enable: settings.plugins.bedready !== undefined">
+                    {{ _('Do <b>not</b> preheat when <a target="_blank" href="https://github.com/jneilliii/OctoPrint-BedReady">BedReady Plugin</a> indicates bed is not ready.') }}
+                    <!-- ko if: settings.plugins.bedready !== undefined -->
+                    <span class="text-success">{{ _("(available)") }}</span>
+                    <!-- /ko -->
+                    <!-- ko if: settings.plugins.bedready === undefined -->
+                    <span class="text-error">{{ _("(not installed)") }}</span>
+                    <!-- /ko -->
+                </label>
             </div>
         </div>
+        
 
         <h4>{{ _('GCode file parsing') }}</h4>
         <span>GCode parsing only enabled when 'Preheat on GCode loaded' is enabled</span></br>

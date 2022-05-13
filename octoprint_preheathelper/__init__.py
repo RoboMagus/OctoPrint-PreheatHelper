@@ -203,6 +203,8 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
             preheat_on_file_load=True,
             preheat_on_printer_connected=True,
 
+            check_bedready_before_preheat=False,
+
             # Not a setting, just to store last known setpoints...
             last_bed_temp_setpoint=None,
             last_tool_temp_setpoint=None,
