@@ -36,18 +36,35 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
             temperature = None
         return temperature
 
-    def do_preheat(self, nozzle, bed, chamber):
-        nozzle_str = f"Nozzle: {nozzle} " if nozzle else ''
-        bed_str = f"Bed: {bed} " if bed else ''
-        chamber_str = f"Chamber: {chamber} " if chamber else ''
-        self._logger.info(f"Pre-heating {nozzle_str}{bed_str}{chamber_str}")
+    def is_bed_ready(self):     
+        try:   
+            self._logger.debug("Checking if 'Bed Ready'...")
+            helpers = self._plugin_manager.get_helpers("bedready")
+            if helpers and "check_bed" in helpers:
+                bed_ready = helpers["check_bed"]()
+                self._logger.debug(f"Bed Ready: {bed_ready['bed_clear']} ({bed_ready})")
+                return bed_ready['bed_clear']
+            else:
+                self._logger.warning("could not check 'Bed Ready'!")
+        except Exception as e:
+            self._logger.error("TraceBack: {}".format(''.join(x for x in traceback.format_exception(*sys.exc_info()))))
+        return False
 
-        if nozzle:
-            self._printer.commands(f"M104 S{int(nozzle)}")
-        if bed:
-            self._printer.commands(f"M140 S{int(bed)}")
-        if chamber:
-            self._printer.commands(f"M141 S{int(chamber)}")
+    def do_preheat(self, nozzle, bed, chamber):
+        if self._settings.getBoolean(["check_bedready_before_preheat"]) and not self.is_bed_ready():
+            self._logger.info(f"NOT Pre-heating, as bed is not ready!")
+        else:
+            nozzle_str = f"Nozzle: {nozzle} " if nozzle else ''
+            bed_str = f"Bed: {bed} " if bed else ''
+            chamber_str = f"Chamber: {chamber} " if chamber else ''
+            self._logger.info(f"Pre-heating {nozzle_str}{bed_str}{chamber_str}")
+
+            if nozzle:
+                self._printer.commands(f"M104 S{int(nozzle)}")
+            if bed:
+                self._printer.commands(f"M140 S{int(bed)}")
+            if chamber:
+                self._printer.commands(f"M141 S{int(chamber)}")
 
     def preprocess_loaded_file(self, full_filename):
         """
