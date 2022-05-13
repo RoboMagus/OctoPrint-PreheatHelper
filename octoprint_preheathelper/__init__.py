@@ -43,67 +43,84 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
         self._logger.info(f"Pre-heating {nozzle_str}{bed_str}{chamber_str}")
 
         if nozzle:
-            self._printer.commands(f"M104 S{nozzle}")
+            self._printer.commands(f"M104 S{int(nozzle)}")
         if bed:
-            self._printer.commands(f"M140 S{bed}")
+            self._printer.commands(f"M140 S{int(bed)}")
         if chamber:
-            self._printer.commands(f"M141 S{chamber}")
+            self._printer.commands(f"M141 S{int(chamber)}")
 
     def preprocess_loaded_file(self, full_filename):
         """
             Find first occurence of Nozzle, Bed, and Chamber temperature setpoint
-        """        
-        nozzle_setpoint = self._settings.get(["nozzle_setpoint_default"])
-        bed_setpoint = self._settings.get(["bed_setpoint_default"])
-        chamber_setpoint = self._settings.get(["chamber_setpoint_default"])
+        """       
+        try:  
+            nozzle_setpoint = self._settings.get(["nozzle_setpoint_default"])
+            bed_setpoint = self._settings.get(["bed_setpoint_default"])
+            chamber_setpoint = self._settings.get(["chamber_setpoint_default"])
 
-        search_nozzle = self._settings.get(["search_nozzle"])
-        search_bed = self._settings.get(["search_bed"])
-        search_chamber = self._settings.get(["search_chamber"])
+            search_nozzle = self._settings.get(["search_nozzle"])
+            search_bed = self._settings.get(["search_bed"])
+            search_chamber = self._settings.get(["search_chamber"])
 
-        max_search_lines = self._settings.get(["max_search_lines"])
+            max_search_lines = self._settings.get(["max_search_lines"])
 
-        _N = 'Nozzle ' if search_nozzle else ''
-        _B = 'Bed ' if search_bed else ''
-        _C = 'Chamber ' if search_chamber else ''
-        self._logger.debug(f"Searching {full_filename} for: {_N}{_B}{_C}")
+            # Ensure integers:
+            if nozzle_setpoint:
+                nozzle_setpoint = int(nozzle_setpoint)
+            if bed_setpoint:
+                bed_setpoint = int(bed_setpoint)
+            if chamber_setpoint:
+                chamber_setpoint = int(chamber_setpoint)
+            if max_search_lines:
+                max_search_lines = int(max_search_lines)
 
-        with open(full_filename) as f:
-            for index, line in enumerate(f):
-                # self._logger.debug(f"Line {index}: {line}")
-                if line.startswith('M'):
-                    # Set hotend (and wait)
-                    if (line.startswith('M104') or line.startswith('M109')) and search_nozzle:
-                        self._logger.debug(f"  Nozzle temp: {line}")
-                        _setpoint = self.parse_heater_command(line)
-                        if _setpoint and _setpoint >= MINIMAL_SETPOINT_TEMPERATURE:
-                            self._logger.info(f"  Nozzle temp: {_setpoint}")
-                            nozzle_setpoint = _setpoint
-                            search_nozzle = False
-                    # Set bed (and wait)
-                    elif (line.startswith('M140') or line.startswith('M190')) and search_bed:
-                        self._logger.debug(f"  Bed temp: {line}")
-                        _setpoint = self.parse_heater_command(line)
-                        if _setpoint and _setpoint >= MINIMAL_SETPOINT_TEMPERATURE:
-                            self._logger.info(f"  Bed temp: {_setpoint}")
-                            bed_setpoint = _setpoint
-                            search_bed = False
-                    # Set bed (and wait)
-                    elif (line.startswith('M141') or line.startswith('M191')) and search_chamber:
-                        self._logger.debug(f"  Chamber temp: {line}")
-                        _setpoint = self.parse_heater_command(line)
-                        if _setpoint and _setpoint >= MINIMAL_SETPOINT_TEMPERATURE:
-                            self._logger.info(f"  Chamber temp: {_setpoint}")
-                            chamber_setpoint = _setpoint
-                            search_chamber = False
-                # Stop searching if we've found what we're looking for
-                if not (search_nozzle or search_bed or search_chamber):
-                    self._logger.info(f"Found all temperature setpoints after {index} lines")
-                    break
-                # Stop searching after parsing N lines
-                if max_search_lines and index > max_search_lines:
-                    self._logger.warning(f"Could not find temperature setpoints!")
-                    break
+            _N = 'Nozzle ' if search_nozzle else ''
+            _B = 'Bed ' if search_bed else ''
+            _C = 'Chamber ' if search_chamber else ''
+            self._logger.debug(f"Searching {full_filename} for: {_N}{_B}{_C}")
+        
+            with open(full_filename) as f:
+                for index, line in enumerate(f):
+                    # self._logger.debug(f"Line {index}: {line}")
+                    if line.startswith('M'):
+                        # Set hotend (and wait)
+                        if (line.startswith('M104') or line.startswith('M109')) and search_nozzle:
+                            self._logger.debug(f"  Nozzle temp: {line}")
+                            _setpoint = self.parse_heater_command(line)
+                            if _setpoint and _setpoint >= MINIMAL_SETPOINT_TEMPERATURE:
+                                self._logger.info(f"  Nozzle temp: {_setpoint}")
+                                nozzle_setpoint = _setpoint
+                                search_nozzle = False
+                        # Set bed (and wait)
+                        elif (line.startswith('M140') or line.startswith('M190')) and search_bed:
+                            self._logger.debug(f"  Bed temp: {line}")
+                            _setpoint = self.parse_heater_command(line)
+                            if _setpoint and _setpoint >= MINIMAL_SETPOINT_TEMPERATURE:
+                                self._logger.info(f"  Bed temp: {_setpoint}")
+                                bed_setpoint = _setpoint
+                                search_bed = False
+                        # Set bed (and wait)
+                        elif (line.startswith('M141') or line.startswith('M191')) and search_chamber:
+                            self._logger.debug(f"  Chamber temp: {line}")
+                            _setpoint = self.parse_heater_command(line)
+                            if _setpoint and _setpoint >= MINIMAL_SETPOINT_TEMPERATURE:
+                                self._logger.info(f"  Chamber temp: {_setpoint}")
+                                chamber_setpoint = _setpoint
+                                search_chamber = False
+                    # Stop searching if we've found what we're looking for
+                    if not (search_nozzle or search_bed or search_chamber):
+                        self._logger.info(f"Found all temperature setpoints after {index} lines")
+                        break
+                    # Stop searching after parsing N lines
+                    if max_search_lines and index > max_search_lines:
+                        self._logger.warning(f"Could not find temperature setpoints!")
+                        break
+        except Exception as e:
+            self._logger.error("TraceBack: {}".format(''.join(x for x in traceback.format_exception(*sys.exc_info()))))
+            # In case of error, don't preheat!
+            nozzle_setpoint = None
+            bed_setpoint = None
+            chamber_setpoint = None
 
         return nozzle_setpoint, bed_setpoint, chamber_setpoint
 
@@ -125,24 +142,42 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
             elif event == Events.CONNECTED:
                 if self._settings.get(["preheat_on_printer_connected"]):
                     self._logger.info("Starting pre-heat on printer connected")
-                    self.do_preheat(self._settings.get(["nozzle_setpoint_default"]),
-                                    self._settings.get(["bed_setpoint_default"]),
+
+                    tool_setpoint = self._settings.get(["nozzle_setpoint_default"])
+                    if(self._settings.get(["use_last_used_tool_temperature"]) and self._last_tool_temp_setpoint > 0):
+                        tool_setpoint = self._last_tool_temp_setpoint
+
+                    bed_setpoint = self._settings.get(["bed_setpoint_default"])
+                    if(self._settings.get(["use_last_used_bed_temperature"]) and self._last_bed_temp_setpoint > 0):
+                        bed_setpoint = self._last_bed_temp_setpoint
+
+                    self.do_preheat(tool_setpoint,
+                                    bed_setpoint,
                                     self._settings.get(["chamber_setpoint_default"]) )
-        except:
-            exc_type, exc_value, exc_tb = sys.exc_info()
-            self._logger.error("TraceBack: {}".format(''.join(x for x in traceback.format_exception(exc_type, exc_value, exc_tb))))
+        except Exception as e:
+            self._logger.error("TraceBack: {}".format(''.join(x for x in traceback.format_exception(*sys.exc_info()))))
 
     def on_temperatures_received(self, comm_instance, parsed_temperatures, *args, **kwargs):
         # {'B': (45.2, 50.0), 'T0': (178.9, 210.0), 'T1': (21.3, 0.0)}
-        if parsed_temperatures.get("B"):
-            bed_target = parsed_temperatures.get("B")[-1]
-            if bed_target >= MINIMAL_SETPOINT_TEMPERATURE:
-                self._last_bed_temp_setpoint = bed_target
+        try:
+            last_bed_setpoint = self._last_bed_temp_setpoint
+            last_tool_setpoint = self._last_tool_temp_setpoint
+            if parsed_temperatures.get("B"):
+                bed_target = parsed_temperatures.get("B")[-1]
+                if bed_target >= MINIMAL_SETPOINT_TEMPERATURE:
+                    self._last_bed_temp_setpoint = bed_target
 
-        if parsed_temperatures.get("T0"):
-            tool_target = parsed_temperatures.get("T0")[-1]
-            if tool_target >= MINIMAL_SETPOINT_TEMPERATURE:
-                self._last_tool_temp_setpoint = tool_target
+            if parsed_temperatures.get("T0"):
+                tool_target = parsed_temperatures.get("T0")[-1]
+                if tool_target >= MINIMAL_SETPOINT_TEMPERATURE:
+                    self._last_tool_temp_setpoint = tool_target
+
+            if last_bed_setpoint != self._last_bed_temp_setpoint or last_tool_setpoint != self._last_tool_temp_setpoint:
+                self._settings.set(["last_bed_temp_setpoint"], int(self._last_bed_temp_setpoint))
+                self._settings.set(["last_tool_temp_setpoint"], int(self._last_tool_temp_setpoint))
+                self._logger.debug(f"Stored last Received setpoints ({parsed_temperatures}). Last setpoints Bed: {self._last_bed_temp_setpoint}, Tool: {self._last_tool_temp_setpoint}")
+        except Exception as e:
+            self._logger.error("TraceBack: {}".format(''.join(x for x in traceback.format_exception(*sys.exc_info()))))
 
         return parsed_temperatures
 
@@ -150,25 +185,40 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
 
     def get_settings_defaults(self):
         return dict(
+            # Setpoint settings
             nozzle_setpoint_default=215,
             bed_setpoint_default=60,
             chamber_setpoint_default=None,
 
+            use_last_used_tool_temperature=False,
+            use_last_used_bed_temperature=False,
+
+            # File parse settings
             search_nozzle=True,
             search_bed=True,
             search_chamber=False,
             max_search_lines=2500,
 
+            # Trigger settings
             preheat_on_file_load=True,
             preheat_on_printer_connected=True,
 
             # Not a setting, just to store last known setpoints...
-            _last_bed_temp_setpoint=None,
-            _last_tool_temp_setpoint=None,
+            last_bed_temp_setpoint=None,
+            last_tool_temp_setpoint=None,
         )
 
+    def update_missing_settings(self):
+        default_settings = self.get_settings_defaults()
+        for key in default_settings:
+            if None == self._settings.get([key]):
+                self._settings.set([key], default_settings[key])
+                self._logger.debug(f"Added default value ({default_settings[key]}) for missing setting '{key}'")
+
     def on_settings_initialized(self):
-        self._logger.debug(f"on_settings_initialized(): {self._settings}")
+        self.update_missing_settings()
+        self._last_bed_temp_setpoint = self._settings.get(["last_bed_temp_setpoint"])
+        self._last_tool_temp_setpoint = self._settings.get(["last_tool_temp_setpoint"])
 
         
     def on_settings_save(self, data):
@@ -193,6 +243,7 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
 
     def on_shutdown(self):
         self._logger.debug("PreHeatHelper shutdown!")
+        self._logger.debug(f"Last used setpoints at shutdown: tool={self._settings.get(['last_tool_temp_setpoint'])}, bed={self._settings.get(['last_bed_temp_setpoint'])}")
 
     ##~~ TemplatePlugin mixin
 

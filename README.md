@@ -19,3 +19,9 @@ or manually using this URL:
 - Select if you want the plugin to start pre-heating when the printer connects using default setpoints, or when you load a print file (or both).
 - For auto pre-heat when a file loads you can select for which setpoints to search (Nozzle, Bed, and Chamber) and the max number of GCode lines to parse.
 
+## Roadmap
+- [x] Preheat on printer connect.
+- [x] Preheat on file loaded.
+  - With setpoints from GCode file.
+- [ ] Preheat to last used setpoints.
+- [ ] Warning when difference between last used temperatures and GCode file indicate different filament.
