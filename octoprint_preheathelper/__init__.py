@@ -268,6 +268,25 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
                 "repo": "OctoPrint-PreheatHelper",
                 "current": self._plugin_version,
 
+                "stable_branch": {
+                    "name": "Stable",
+                    "branch": "master",
+                    "comittish": ["master"],
+                },
+                "prerelease_branches": [
+                    {
+                        "name": "Release Candidate",
+                        "branch": "RC",
+                        "comittish": ["RC", "master"],
+                    },
+                    {
+                        "name": "Development",
+                        "branch": "dev",
+                        "comittish": ["dev", "RC", "master"],
+                    }
+                ],
+
+
                 # update method: pip
                 "pip": "https://github.com/RoboMagus/OctoPrint-PreheatHelper/archive/{target_version}.zip",
             }
