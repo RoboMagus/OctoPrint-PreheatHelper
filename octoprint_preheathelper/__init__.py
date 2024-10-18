@@ -164,12 +164,12 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
             last_tool_setpoint = self._last_tool_temp_setpoint
             if parsed_temperatures.get("B"):
                 bed_target = parsed_temperatures.get("B")[-1]
-                if bed_target >= MINIMAL_SETPOINT_TEMPERATURE:
+                if bed_target and bed_target >= MINIMAL_SETPOINT_TEMPERATURE:
                     self._last_bed_temp_setpoint = bed_target
 
             if parsed_temperatures.get("T0"):
                 tool_target = parsed_temperatures.get("T0")[-1]
-                if tool_target >= MINIMAL_SETPOINT_TEMPERATURE:
+                if tool_target and tool_target >= MINIMAL_SETPOINT_TEMPERATURE:
                     self._last_tool_temp_setpoint = tool_target
 
             if last_bed_setpoint != self._last_bed_temp_setpoint or last_tool_setpoint != self._last_tool_temp_setpoint:
