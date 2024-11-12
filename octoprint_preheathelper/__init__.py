@@ -54,10 +54,12 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
         if self._settings.getBoolean(["check_bedready_before_preheat"]) and not self.is_bed_ready():
             self._logger.info(f"NOT Pre-heating, as bed is not ready!")
         else:
-            nozzle_str = f"Nozzle: {nozzle} " if nozzle else ''
-            bed_str = f"Bed: {bed} " if bed else ''
-            chamber_str = f"Chamber: {chamber} " if chamber else ''
-            self._logger.info(f"Pre-heating {nozzle_str}{bed_str}{chamber_str}")
+            temp_str = ", ".join(filter(None, [
+                f"Nozzle: {nozzle}" if nozzle else '',
+                f"Bed: {bed}" if bed else '',
+                f"Chamber: {chamber}" if chamber else ''
+            ]))
+            self._logger.info(f"Pre-heating {temp_str}")
 
             if nozzle:
                 self._printer.commands(f"M104 S{int(nozzle)}")
@@ -65,6 +67,9 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
                 self._printer.commands(f"M140 S{int(bed)}")
             if chamber:
                 self._printer.commands(f"M141 S{int(chamber)}")
+            
+            if hasattr(self, 'send_notification'):
+                self.send_notification({"message": f"Pre-heating: {temp_str}", "title": "PreHeatHelper", "type": "notice", "delay": 15})
 
     def preprocess_loaded_file(self, full_filename):
         """
@@ -258,6 +263,13 @@ class PreheathelperPlugin(  octoprint.plugin.SettingsPlugin,
         self._logger.debug("on_after_startup()")
         self.print_settings()
 
+        try:
+            helpers = self._plugin_manager.get_helpers("api_notifications")
+            if helpers and "notify" in helpers:
+                self.send_notification = helpers["notify"]
+        except Exception as e:
+            self._logger.error("TraceBack: {}".format(''.join(x for x in traceback.format_exception(*sys.exc_info()))))
+
     ##~~ ShutdownPlugin mixin
 
     def on_shutdown(self):
@@ -325,9 +337,9 @@ def __plugin_load__():
     plugin = PreheathelperPlugin()
 
     global __plugin_helpers__
-    __plugin_helpers__ = dict(
-        dummy_func = plugin.dummy_func
-    )
+    __plugin_helpers__ = {
+        "dummy_func": plugin.dummy_func,
+    }
 
     global __plugin_implementation__
     __plugin_implementation__ = plugin
